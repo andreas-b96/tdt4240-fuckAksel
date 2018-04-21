@@ -16,6 +16,7 @@ import java.util.Random;
 
 import co.aeons.zombie.shooter.ZombieShooter;
 import co.aeons.zombie.shooter.entities.Player;
+import co.aeons.zombie.shooter.entities.zombies.SinusZombie;
 import co.aeons.zombie.shooter.entities.zombies.Trump;
 import co.aeons.zombie.shooter.entities.Wall;
 import co.aeons.zombie.shooter.entities.zombies.Zombie;
@@ -195,23 +196,41 @@ public class PlayState extends GameState {
     private void spawnZombies() {
 
         int numToSpawn = 4 + level - 1;
+        System.out.println(numToSpawn);
 
         // String for multiplayer api
         // Format:
         //zombietype:x,y;
         zombieAPI = new StringBuilder();
+        float x;
+        float y;
 
+        // Spawn Basics
         for (int i = 0; i < numToSpawn; i++) {
-            float x = randInt(ZombieShooter.WIDTH + 50, ZombieShooter.WIDTH + 150);
-            float y = randInt(0, ZombieShooter.HEIGHT - 100);
-            zombies.add(new Trump(x, y, Difficulty.getDifficulty()));
-            zombieAPI.append("t").append(":").append(x).append(",").append(y).append(";"); //TODO Maybe fix ending ;
+            //Spawn Basic Zombies
+            x = randInt(ZombieShooter.WIDTH + 50, ZombieShooter.WIDTH + 150);
+            y = randInt(0, ZombieShooter.HEIGHT - 100);
             zombies.add(new Zombie(x, y, Difficulty.getDifficulty()));
             zombieAPI.append("z").append(":").append(x).append(",").append(y).append(";"); //TODO Maybe fix ending ;
-
             // TODO: 17/04/2018 Unfucke logikken for spawning, nå hanver Trump på toppen av en zambi
-
         }
+
+        // Spawn Trumps
+        for (int i = 0; i < numToSpawn / 2; i++) {
+            x = randInt(ZombieShooter.WIDTH + 50, ZombieShooter.WIDTH + 150);
+            y = randInt(0, ZombieShooter.HEIGHT - 100);
+            zombies.add(new Trump(x, y, Difficulty.getDifficulty()));
+            zombieAPI.append("t").append(":").append(x).append(",").append(y).append(";"); //TODO Maybe fix ending ;
+        }
+
+        for (int i = 0; i < numToSpawn / 4; i++) {
+            x = randInt(ZombieShooter.WIDTH + 50, ZombieShooter.WIDTH + 150);
+            y = randInt(50, 200);
+            zombies.add(new SinusZombie(x, y, Difficulty.getDifficulty()));
+            zombieAPI.append("s").append(":").append(x).append(",").append(y).append(";"); //TODO Maybe fix ending ;
+        }
+
+
         //Remove trailing semicolon
         zombieAPI.deleteCharAt(zombieAPI.length()-1);
     }
@@ -239,7 +258,7 @@ public class PlayState extends GameState {
             spawnCooldown += 1.0f;
             if (spawnCooldown % 17 == 0) {
                 System.out.println("Difficulty increased");
-                level += 2;
+                level += 4;
             }
         }
     }
