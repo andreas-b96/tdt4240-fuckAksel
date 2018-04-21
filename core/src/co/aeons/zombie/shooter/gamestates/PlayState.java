@@ -32,6 +32,9 @@ import co.aeons.zombie.shooter.managers.Difficulty;
 import co.aeons.zombie.shooter.managers.GameStateManager;
 import co.aeons.zombie.shooter.managers.Jukebox;
 
+import co.aeons.zombie.shooter.managers.Save;
+import co.aeons.zombie.shooter.utils.FrameRate;
+
 import static co.aeons.zombie.shooter.ZombieShooter.cam;
 import static co.aeons.zombie.shooter.ZombieShooter.gamePort;
 
@@ -40,6 +43,7 @@ public class PlayState extends GameState {
     protected SpriteBatch sb;
     protected ShapeRenderer sr;
     protected Stage stage;
+    private FrameRate framerate;
 
     //Makes text easy to use
     private GlyphLayout layout;
@@ -47,7 +51,7 @@ public class PlayState extends GameState {
 
     //Background texture
     private Texture bg;
-    protected StringBuilder zombieAPI;
+    protected String zombieAPI;
 
     protected Player player;
     protected ArrayList<Bullet> bullets;
@@ -84,7 +88,6 @@ public class PlayState extends GameState {
     private int damageModifier;
     private int level;
 
-
     //Flag to check if powerup is used
     private boolean effectButtonIsClicked;
 
@@ -102,6 +105,7 @@ public class PlayState extends GameState {
         magazineFont = new BitmapFont();
         layout = new GlyphLayout();
         bg = new Texture(Gdx.files.internal("backgrounds/grasspath2.jpg"));
+        framerate = new FrameRate();
 
         //sets up camera
         cam.position.set(cam.viewportWidth / 2, cam.viewportHeight / 2, 0);
@@ -117,8 +121,8 @@ public class PlayState extends GameState {
         spawnTimer = 1.0f;
         spawnCooldown = 1.0f;
 
-        spawnZombies();
-
+        //spawnZombies();
+        zombieAPI = "NONE";
 
         //Set up variables for powerups
         spawnDelay = randInt(0, 10);
@@ -168,7 +172,7 @@ public class PlayState extends GameState {
         cycleDownButton = new CycleDownButton(cycleDownButtonBounds);
 
         //Create empty button
-        effectButton = new InstaKill(new Rectangle(0, 0, 0, 0));
+       effectButton = new InstaKill(new Rectangle(0, 0, 0, 0));
 
         Gdx.input.setInputProcessor(this);
         Gdx.input.setCatchBackKey(true);
@@ -176,21 +180,14 @@ public class PlayState extends GameState {
 
     public void update(float dt) {
         checkCollisions();
-
         updateTimers(dt);
-
         zombieSpawnLogic();
-
         player.update(dt);
-
         updatePlayerBullets(dt);
-
         updateZombies(dt);
-
-
         spawnEffectButton();
-
         updateWallHealth();
+        framerate.update();
     }
 
     private void spawnZombies() {
@@ -201,9 +198,10 @@ public class PlayState extends GameState {
         // String for multiplayer api
         // Format:
         //zombietype:x,y;
-        zombieAPI = new StringBuilder();
         float x;
         float y;
+
+        zombieAPI = "";
 
         // Spawn Basics
         for (int i = 0; i < numToSpawn; i++) {
@@ -211,8 +209,8 @@ public class PlayState extends GameState {
             x = randInt(ZombieShooter.WIDTH + 50, ZombieShooter.WIDTH + 150);
             y = randInt(0, ZombieShooter.HEIGHT - 100);
             zombies.add(new Zombie(x, y, Difficulty.getDifficulty()));
-            zombieAPI.append("z").append(":").append(x).append(",").append(y).append(";"); //TODO Maybe fix ending ;
-            // TODO: 17/04/2018 Unfucke logikken for spawning, nå hanver Trump på toppen av en zambi
+            zombieAPI += "z"+":"+x+","+y+";";
+
         }
 
         // Spawn Trumps
@@ -220,19 +218,15 @@ public class PlayState extends GameState {
             x = randInt(ZombieShooter.WIDTH + 50, ZombieShooter.WIDTH + 150);
             y = randInt(0, ZombieShooter.HEIGHT - 100);
             zombies.add(new Trump(x, y, Difficulty.getDifficulty()));
-            zombieAPI.append("t").append(":").append(x).append(",").append(y).append(";"); //TODO Maybe fix ending ;
+            zombieAPI += "t"+":"+x+","+y+";";
         }
 
         for (int i = 0; i < numToSpawn / 4; i++) {
             x = randInt(ZombieShooter.WIDTH + 50, ZombieShooter.WIDTH + 150);
             y = randInt(50, 200);
             zombies.add(new SinusZombie(x, y, Difficulty.getDifficulty()));
-            zombieAPI.append("s").append(":").append(x).append(",").append(y).append(";"); //TODO Maybe fix ending ;
+            zombieAPI += "s"+":"+x+","+y+";";
         }
-
-
-        //Remove trailing semicolon
-        zombieAPI.deleteCharAt(zombieAPI.length()-1);
     }
 
 
@@ -259,6 +253,7 @@ public class PlayState extends GameState {
             if (spawnCooldown % 17 == 0) {
                 System.out.println("Difficulty increased");
                 level += 4;
+
             }
         }
     }
@@ -279,9 +274,10 @@ public class PlayState extends GameState {
     }
 
     protected void updateWallHealth() {
-        if (wall.getHealth() <= 0) {
+        if (wall.getWallHealth() <= 0) {
             Jukebox.getIngameMusic().stop();
             Jukebox.playGameoverMusic();
+            Save.gd.setTentativeScore(this.getScore());
             gsm.setState(GameStateManager.GAMEOVER);
         }
     }
@@ -313,7 +309,7 @@ public class PlayState extends GameState {
         this.effectTimer = 0;
     }
 
-    private void checkCollisions() {
+    protected void checkCollisions() {
         //zombie-wall collision
         for (int i = 0; i < zombies.size(); i++) {
             Zombie zombie = zombies.get(i);
@@ -332,16 +328,13 @@ public class PlayState extends GameState {
                 if (a.collide(b)) {
                     bullets.remove(i);
                     i--;
-
                     a.getHurt(b.getDamage() * damageModifier);
-
                     if (a.getHealth() <= 0) {
+                        Zombie.deathSound();
                         zombies.remove(j);
                         j--;
                         this.incrementScore(a.getScore());
                     }
-
-                    Jukebox.play("zombieHit");
                     break;
                 }
             }
@@ -397,7 +390,7 @@ public class PlayState extends GameState {
         this.layout.setText(magazineFont, magazineOutput);
         scoreFont.draw(sb, layout, cam.viewportWidth - 250, (fireButton.getY() + fireBounds.getHeight()) / 2);
 //        Wall-health
-        String wallHealthOutput = "❤" + Integer.toString(this.wall.getHealth());
+        String wallHealthOutput = "❤" + Integer.toString(this.wall.getWallHealth());
         this.layout.setText(wallHealthFont, wallHealthOutput);
         scoreFont.draw(sb, layout, (this.wall.getx() + this.wall.getRectangle().getWidth()) / 2 + 25, (this.wall.gety() + this.wall.getRectangle().getHeight()) / 2);
 
@@ -413,6 +406,7 @@ public class PlayState extends GameState {
         this.stage.addActor(muteButton);
         this.stage.act();
         this.stage.draw();
+        framerate.render();
 
     }
 
@@ -431,8 +425,6 @@ public class PlayState extends GameState {
     //Method called when FireButton pressed
     private void onFireButtonPressed() {
         player.shoot();
-        System.out.println("FireButton pressed");
-        Jukebox.play("gunshot");
     }
 
     //Method called when FireButton pressed
@@ -441,27 +433,21 @@ public class PlayState extends GameState {
         muteButton.loadTextureRegion();
     }
 
-
     private void onEffectButtonPressed() {
-        System.out.println("Instakill activated");
-        Jukebox.play("powerup");
         effectButton.effect(this);
+        effectButton.playSound();
         effectButton.remove();
         effectButton = new InstaKill(new Rectangle(0, 0, 0, 0));
         effectButtonIsClicked = true;
     }
 
     private void onCycleUpPressed() {
-        //TODO: Uncomment me to print next weapon
-        //System.out.println("Next Weapon");
         player.nextWeapon();
         reloadFireButtonTexture();
     }
 
     private void onCycleDownPressed() {
         player.prevWeapon();
-        //TODO: Uncomment me to print previous weapon
-        //System.out.println("Previous Weapon");
         reloadFireButtonTexture();
     }
 
@@ -525,7 +511,6 @@ public class PlayState extends GameState {
 
         if (playerLane.contains(tmpVec2.x, tmpVec2.y)) {
             //player.setTransform(new Vector2(player.getUserData().getRunningPosition().x, tmpVec2.y / B2DConstants.PPM), 0);
-
             player.setPosition(player.getx(), tmpVec2.y);
         }
         return true;
