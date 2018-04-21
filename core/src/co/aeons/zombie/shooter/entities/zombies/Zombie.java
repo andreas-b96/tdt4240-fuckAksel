@@ -1,4 +1,4 @@
-package co.aeons.zombie.shooter.entities;
+package co.aeons.zombie.shooter.entities.zombies;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 
 import co.aeons.zombie.shooter.ZombieShooter;
+import co.aeons.zombie.shooter.entities.SuperObject;
 import co.aeons.zombie.shooter.managers.ResourceManager;
 
 public class Zombie extends SuperObject {

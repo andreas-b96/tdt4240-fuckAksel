@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 
-import co.aeons.zombie.shooter.entities.Zombie;
+import co.aeons.zombie.shooter.entities.zombies.Zombie;
 import co.aeons.zombie.shooter.gamestates.PlayState;
 
 public class NukeButton extends EffectButton{

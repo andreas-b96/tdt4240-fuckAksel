@@ -16,9 +16,9 @@ import java.util.Random;
 
 import co.aeons.zombie.shooter.ZombieShooter;
 import co.aeons.zombie.shooter.entities.Player;
-import co.aeons.zombie.shooter.entities.Trump;
+import co.aeons.zombie.shooter.entities.zombies.Trump;
 import co.aeons.zombie.shooter.entities.Wall;
-import co.aeons.zombie.shooter.entities.Zombie;
+import co.aeons.zombie.shooter.entities.zombies.Zombie;
 import co.aeons.zombie.shooter.entities.bullets.Bullet;
 import co.aeons.zombie.shooter.entities.buttons.CycleDownButton;
 import co.aeons.zombie.shooter.entities.buttons.CycleUpButton;
@@ -30,7 +30,6 @@ import co.aeons.zombie.shooter.factories.RandomButtonFactory;
 import co.aeons.zombie.shooter.managers.Difficulty;
 import co.aeons.zombie.shooter.managers.GameStateManager;
 import co.aeons.zombie.shooter.managers.Jukebox;
-import co.aeons.zombie.shooter.managers.Save;
 
 import static co.aeons.zombie.shooter.ZombieShooter.cam;
 import static co.aeons.zombie.shooter.ZombieShooter.gamePort;
