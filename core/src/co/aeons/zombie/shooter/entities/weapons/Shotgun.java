@@ -10,49 +10,26 @@ import co.aeons.zombie.shooter.managers.Jukebox;
 public class Shotgun extends Weapon{
 
     private int pelletCount;
-    private static final float RELOAD_TIME = 4.0f;
 
     public Shotgun(float x, float y) {
         super(x, y);
-        clipSize = 4;
-        reloadTime = 1.5f;
         fireRate = 0.7f;
-        bullets = new LinkedList<Bullet>();
         pelletCount = 24;
-        reload();
-        isReloading = false;
         texturePath = "weapons/shotgun1.png";
     }
 
     @Override
     public ArrayList<Bullet> shoot() {
         ArrayList<Bullet> output = new ArrayList<Bullet>();
-        if(!isReloading && !isFired) {
-            if(!bullets.isEmpty()){
-                for (int i = 0; i < pelletCount; i++) {
-                    output.add(getNewBullet());
-                }
-                playSound();
-                bullets.poll();
-                if (bullets.isEmpty()) {
-                    reload();
-                    Jukebox.play("shotgunReload");
-                }
-                isFired = true;
-                fireRate = 0.7f;
-            }else reload();
+        if(!isFired) {
+            for (int i = 0; i < pelletCount; i++) {
+                output.add(getNewBullet());
+            }
+            playSound();
+            isFired = true;
+            fireRate = 0.7f;
         }
         return output;
-    }
-
-    @Override
-    public void reload() {
-        bullets.clear();
-        isReloading = true;
-        reloadTime = RELOAD_TIME;
-        for (int i = 0; i < clipSize; i++) {
-            bullets.add(getNewBullet());
-        }
     }
 
     @Override
