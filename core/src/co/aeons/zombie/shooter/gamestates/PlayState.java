@@ -377,14 +377,6 @@ public class PlayState extends GameState {
         String scoreOutput = "Score:";
         this.layout.setText(scoreFont, scoreOutput);
         scoreFont.draw(sb, layout, (this.wall.getx() - layout.width) / 2, cam.viewportHeight - 5);
-        float scoreHeight = layout.height;
-        scoreOutput = Long.toString(this.getScore());
-        this.layout.setText(scoreFont, scoreOutput);
-        scoreFont.draw(sb, layout, (this.wall.getx() - layout.width) / 2, cam.viewportHeight - 10 - scoreHeight);
-//        Magazine-size
-        String magazineOutput = Integer.toString(player.getCurrentWeapon().getRemainingBullets()) + "/" + Integer.toString(player.getCurrentWeapon().getClipSize());
-        this.layout.setText(magazineFont, magazineOutput);
-        scoreFont.draw(sb, layout, cam.viewportWidth - 250, (fireButton.getY() + fireBounds.getHeight()) / 2);
 //        Wall-health
         String wallHealthOutput = String.format("%d",  (long) this.wall.getCurrentWallHealth());
         this.layout.setText(wallHealthFont, wallHealthOutput);

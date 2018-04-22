@@ -14,42 +14,21 @@ public class Pistol extends Weapon {
 
     public Pistol(float x, float y) {
         super(x, y);
-        clipSize = 20;
         fireRate = 0.1f;
-
         texturePath = "weapons/pistol1.png";
         weaponTexture = new Texture(texturePath);
-        bullets = new LinkedList<Bullet>();
-        reload();
-        isReloading = false;
     }
 
     @Override
     public ArrayList<Bullet> shoot() {
         ArrayList<Bullet> output = new ArrayList<Bullet>();
-        if(!isReloading && !isFired){
-            if(!bullets.isEmpty()) {
-                output.add(bullets.poll());
+        if(!isFired){
+                output.add(getNewBullet());
                 isFired = true;
                 fireRate = 0.1f;
                 playSound();
-                if (bullets.isEmpty()) {
-                    reload();
-                    Jukebox.play("pistolReload");
-                }
-            }else reload();
         }
         return output;
-    }
-
-    @Override
-    public void reload() {
-        bullets.clear();
-        isReloading = true;
-        reloadTime = RELOAD_TIME;
-        for (int i = 0; i < clipSize; i++) {
-            bullets.add(getNewBullet());
-        }
     }
 
     @Override
