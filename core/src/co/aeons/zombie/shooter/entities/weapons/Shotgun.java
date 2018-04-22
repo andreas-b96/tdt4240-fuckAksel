@@ -13,6 +13,7 @@ public class Shotgun extends Weapon{
 
     public Shotgun(float x, float y) {
         super(x, y);
+
         fireRate = 0.7f;
         pelletCount = 24;
         texturePath = "weapons/shotgun1.png";
